@@ -1,5 +1,5 @@
 import sys
-from lab_magic import list_programs, get_code, show
+from lab_magic import list_programs, list_all, get_code, show, list
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
@@ -9,9 +9,6 @@ if __name__ == "__main__":
         except Exception as err:
             print(f"Error: {err}")
     else:
-        programs = list_programs()
-        print("Available programs:")
-        for p in programs:
-            print(f"  - {p}")
+        list_all()
         print("\nUsage:")
-        print("  python lab.py <program_name>   (e.g., python lab.py p1)")
+        print("  python lab.py <name_or_number>   (e.g., python lab.py p1  or  python lab.py 1)")
