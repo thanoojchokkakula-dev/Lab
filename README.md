@@ -1,74 +1,93 @@
 # Lab Programs Repository
 
-Repository for lab experiments and programs.
+Repository for lab experiments and programs (supports both `.py` and `.txt` files).
 
 ---
 
 ## 💻 On the Other Laptop (In Jupyter Notebook)
 
-Open any Jupyter Notebook on the other laptop. You can use any of the options below:
+Open any Jupyter Notebook on the other laptop and paste these into code cells:
 
 ### Option 1: Using Git (Recommended)
 
-#### 1. Clone repository into Jupyter (run in a cell once):
+#### 1. Setup / Update:
 ```python
-!git clone https://github.com/thanoojchokkakula-dev/Lab.git
-%cd Lab
+!git pull
+```
+*(If opening for the very first time on a new laptop: `!git clone https://github.com/thanoojchokkakula-dev/Lab.git` and `%cd Lab`)*
+
+#### 2. View All Saved Codes (Shows both `.py` and `.txt`):
+```python
+import lab
+lab.list()
+```
+Output:
+```text
+=== Available Codes (2 total) ===
+-----------------------------------
+  [1] p1.py
+  [2] p2.txt
+-----------------------------------
 ```
 
-#### 2. Print or Load the Code:
-- **To print the code in cell output:**
+#### 3. Print or Load Any Code:
+- **By Number:**
   ```python
-  import lab
-  lab.show('p1')
+  lab.show(1)    # prints program #1
+  lab.show(2)    # prints program #2
   ```
-  *(Or: `print(open('p1.py').read())`)*
 
-- **To load the code into the cell to run/edit (Jupyter magic):**
+- **By Name:**
+  ```python
+  lab.show('p1')     # prints p1.py
+  lab.show('p2')     # prints p2.txt
+  ```
+
+- **Load Directly into Cell (Jupyter %load Magic):**
   ```python
   %load p1.py
+  # or
+  %load p2.txt
   ```
-  *(Press `Shift + Enter`, and Jupyter will replace the cell with the full code of `p1.py`)*
+  *(Press **Shift + Enter**, and Jupyter replaces the cell with the full code!)*
 
-- **To list all available programs:**
+- **Jupyter File Listing Magic:**
   ```python
-  import lab
-  lab.list_programs()
+  %ls *.py *.txt
   ```
+  *(Or on Windows: `!dir /b *.py *.txt`)*
 
 ---
 
 ### Option 2: Without Git (Direct 1-Liner from GitHub)
 
-If git is not installed or you don't want to clone the repo, run this in any Jupyter cell:
+If git is not installed, fetch and print any file directly from GitHub:
 
 ```python
 import urllib.request
+# Fetch Python file:
 print(urllib.request.urlopen("https://raw.githubusercontent.com/thanoojchokkakula-dev/Lab/main/p1.py").read().decode())
-```
 
-To fetch any other file later, simply replace `p1.py` with `p2.py`, `p3.py`, etc.
+# Fetch Text file:
+print(urllib.request.urlopen("https://raw.githubusercontent.com/thanoojchokkakula-dev/Lab/main/p2.txt").read().decode())
+```
 
 ---
 
-## 🚀 How to Add New Codes from this Laptop
+## 🚀 How to Add New Codes (.py or .txt) from this Laptop
 
-Whenever you create new code files (e.g. `p2.py`, `p3.py`):
+Whenever you create or save new code files (e.g. `p3.py`, `p4.txt`, etc.):
 
-1. Put the files in this folder.
+1. Put the files in your `Lab` folder.
 2. Open terminal in this folder and run:
    ```bash
    git add .
-   git commit -m "Added new lab programs"
+   git commit -m "Added new codes"
    git push
    ```
 
 3. On the other laptop in Jupyter, simply run:
    ```python
    !git pull
-   ```
-   Now you can print or load the new programs:
-   ```python
-   lab.show('p2')
-   # or %load p2.py
+   lab.list()
    ```
