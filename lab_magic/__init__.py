@@ -1,36 +1,51 @@
 import os
-import glob
 import re
+import json
+import urllib.request
+
+GITHUB_REPO = "thanoojchokkakula-dev/Lab"
+GITHUB_RAW = f"https://raw.githubusercontent.com/{GITHUB_REPO}/main"
+GITHUB_API = f"https://api.github.com/repos/{GITHUB_REPO}/git/trees/main?recursive=1"
 
 def _natural_sort_key(s):
     return [int(text) if text.isdigit() else text.lower() for text in re.split(r'(\d+)', s)]
 
+def _fetch_remote_list():
+    """Fetch files list live from GitHub repository."""
+    try:
+        req = urllib.request.Request(GITHUB_API, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=8) as resp:
+            data = json.loads(resp.read().decode())
+            valid_dirs = ("dva/", "ml/")
+            files = [
+                item["path"] for item in data.get("tree", [])
+                if item.get("type") == "blob"
+                and any(item["path"].startswith(vd) for vd in valid_dirs)
+                and (item["path"].endswith(".py") or item["path"].endswith(".txt"))
+            ]
+            files.sort(key=_natural_sort_key)
+            return files
+    except Exception:
+        return []
+
 def list_programs(folder=None, dir_path="."):
-    """Return a list of all program relative paths (.py and .txt), optionally filtered by folder."""
-    ignore_dirs = {".git", "lab_magic", "__pycache__", ".ipynb_checkpoints", "build", "dist"}
-    ignore_files = {"setup.py", "lab.py", "requirements.txt", "pyproject.toml"}
-
+    """Return list of program paths from dva/ and ml/ (locally if present, or live from GitHub)."""
+    has_lab_dirs = os.path.isdir(os.path.join(dir_path, "dva")) or os.path.isdir(os.path.join(dir_path, "ml"))
+    
     collected = []
-    for root, dirs, files in os.walk(dir_path):
-        # Filter out ignored dirs in-place
-        dirs[:] = [d for d in dirs if d not in ignore_dirs and not d.startswith(".")]
+    if has_lab_dirs:
+        for cat in ("dva", "ml"):
+            cat_dir = os.path.join(dir_path, cat)
+            if os.path.isdir(cat_dir):
+                for f in os.listdir(cat_dir):
+                    if (f.endswith(".py") or f.endswith(".txt")) and not f.startswith("."):
+                        collected.append(f"{cat}/{f}")
+    else:
+        collected = _fetch_remote_list()
 
-        rel_dir = os.path.relpath(root, dir_path).replace("\\", "/")
-        if rel_dir == ".":
-            rel_dir = ""
-
-        # If a specific folder is requested, filter
-        if folder:
-            f_norm = folder.strip().rstrip("/\\").lower()
-            if rel_dir.lower() != f_norm and not rel_dir.lower().startswith(f_norm + "/"):
-                continue
-
-        for f in files:
-            if f.startswith(".") or f.startswith("__") or f.lower() in ignore_files:
-                continue
-            if f.endswith(".py") or f.endswith(".txt"):
-                rel_path = f"{rel_dir}/{f}" if rel_dir else f
-                collected.append(rel_path)
+    if folder:
+        f_norm = folder.strip().rstrip("/\\").lower()
+        collected = [p for p in collected if p.lower().startswith(f_norm + "/")]
 
     collected.sort(key=_natural_sort_key)
     return collected
@@ -39,14 +54,20 @@ def list_all(folder=None, dir_path="."):
     """Print a clean numbered list of all available programs and codes (.py and .txt) grouped by folder."""
     progs = list_programs(folder=folder, dir_path=dir_path)
     if not progs:
+        # Fallback to remote if local was empty
+        progs = _fetch_remote_list()
+        if folder:
+            f_norm = folder.strip().rstrip("/\\").lower()
+            progs = [p for p in progs if p.lower().startswith(f_norm + "/")]
+
+    if not progs:
         target = f" in '{folder}'" if folder else ""
-        print(f"No .py or .txt programs found{target}.")
+        print(f"No programs found{target}.")
         return
 
     print(f"=== Available Codes ({len(progs)} total) ===")
     print("-" * 38)
 
-    # Group by directory using standard dict to avoid shadowing builtins
     groups = {}
     for idx, p in enumerate(progs, 1):
         parts = p.split("/")
@@ -62,12 +83,14 @@ def list_all(folder=None, dir_path="."):
         print()
     print("-" * 38)
 
-# Expose list alias
 list = list_all
 
 def get_code(name, dir_path="."):
     """Read and return code for a program (by number e.g. 1, filename e.g. 'p1', or path e.g. 'ml/p1.py')."""
     progs = list_programs(dir_path=dir_path)
+    if not progs:
+        progs = _fetch_remote_list()
+
     filename = None
 
     # 1. Number lookup (e.g. 1, '1', 2, '2')
@@ -80,44 +103,57 @@ def get_code(name, dir_path="."):
     else:
         name_str = str(name).strip().replace("\\", "/")
 
-        # Direct path check
-        candidates = [
-            name_str,
-            f"{name_str}.py",
-            f"{name_str}.txt"
-        ]
-
-        for cand in candidates:
-            cand_path = os.path.join(dir_path, cand)
-            if os.path.exists(cand_path) and os.path.isfile(cand_path):
-                filename = cand
+        # Check in programs list
+        name_lower = name_str.lower()
+        for p in progs:
+            base = os.path.basename(p).lower()
+            base_no_ext = os.path.splitext(base)[0]
+            if name_lower in (p.lower(), base, base_no_ext):
+                filename = p
                 break
-
-        # Search by basename across all folders
-        if not filename:
-            name_lower = name_str.lower()
-            for p in progs:
-                base = os.path.basename(p).lower()
-                base_no_ext = os.path.splitext(base)[0]
-                if name_lower in (base, base_no_ext, p.lower()):
-                    filename = p
-                    break
 
     if not filename:
         raise FileNotFoundError(
             f"Code '{name}' not found. Available codes: {progs}"
         )
 
+    # First attempt: read local file if present
     filepath = os.path.join(dir_path, filename)
-    with open(filepath, "r", encoding="utf-8", errors="replace") as f:
-        return f.read(), filename
+    if os.path.isfile(filepath):
+        with open(filepath, "r", encoding="utf-8", errors="replace") as f:
+            return f.read(), filename
+
+    # Second attempt: fetch directly from GitHub
+    try:
+        url = f"{GITHUB_RAW}/{filename}"
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=8) as resp:
+            content = resp.read().decode("utf-8", errors="replace")
+            return content, filename
+    except Exception as e:
+        raise FileNotFoundError(f"Could not load '{filename}' locally or from GitHub: {e}")
 
 def show(name, dir_path="."):
-    """Print code with clean formatting."""
+    """Print code with clean formatting in cell output."""
     code, filename = get_code(name, dir_path)
     print(f"--- {filename} ---")
     print(code)
     print("-" * (len(filename) + 8))
+
+def load(name, replace=False):
+    """Load code directly into a Jupyter Notebook cell so you can edit and run it."""
+    try:
+        from IPython import get_ipython
+        ip = get_ipython()
+        if ip is not None:
+            code, filename = get_code(name)
+            ip.set_next_input(code, replace=replace)
+            print(f"Loaded '{filename}' into cell.")
+            return
+    except Exception:
+        pass
+    # If not in IPython, print code
+    show(name)
 
 # IPython Magic registration
 try:
