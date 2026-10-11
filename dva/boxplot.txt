@@ -1,0 +1,20 @@
+EXPERIMENT – 3 
+Aim: Write a Python program to implement Box plot using sample data. 
+Source Code:  
+import numpy as np 
+import pandas as pd 
+import matplotlib.pyplot as plt 
+import seaborn as sns 
+np.random.seed(0) 
+months = ['Apr', 'May', 'Jun'] 
+temperature_data = {month: np.random.normal(35 + i, 5, 100) for i, month in 
+enumerate(months)} 
+df = pd.DataFrame(temperature_data) 
+plt.figure(figsize=(6, 4)) 
+sns.boxplot(data=df) 
+plt.title("Month-wise Temperature Distribution") 
+plt.xlabel("Month") 
+plt.ylabel("Temperature (°C)") 
+plt.xticks(ticks=np.arange(len(months)), labels=months) 
+plt.show() 
+Output:

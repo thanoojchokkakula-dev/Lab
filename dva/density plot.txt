@@ -1,0 +1,13 @@
+Density Plot 
+import matplotlib.pyplot as plt 
+import seaborn as sns 
+import numpy as np 
+data = np.random.normal(loc=75, scale=10, size=70)  
+plt.figure(figsize=(6, 4)) 
+sns.kdeplot(data, color='black', fill=True) 
+plt.title('Density Plot of Test Scores') 
+plt.xlabel('Test Scores') 
+plt.ylabel('Density') 
+plt.tight_layout() 
+plt.show() 
+Output:

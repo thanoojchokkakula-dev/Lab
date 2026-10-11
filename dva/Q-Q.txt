@@ -1,0 +1,17 @@
+EXPERIMENT – 8 
+Aim: Write a Python program to implement a Q-Q (quantile-quantile) plot to compare two 
+datasets. 
+Source Code: 
+import numpy as np 
+import matplotlib.pyplot as plt 
+import scipy.stats as stats 
+data1 = np.random.normal(0, 1, 1000)  
+data2 = np.random.normal(1, 1.5, 1000) 
+plt.figure(figsize=(6, 4)) 
+stats.probplot(data1, dist="norm", plot=plt) 
+stats.probplot(data2, dist="norm", plot=plt) 
+plt.title('Q-Q Plot to Compare Two Datasets') 
+plt.xlabel('Theoretical Quantiles') 
+plt.ylabel('Sample Quantiles') 
+plt.show() 
+Output:

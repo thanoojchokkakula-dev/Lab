@@ -1,0 +1,16 @@
+EXPERIMENT – 5 
+Aim: Write a Python program to implement a Histogram and a Density Plot for a given 
+dataset. 
+Source Code:  
+Histogram  
+import matplotlib.pyplot as plt 
+import numpy as np 
+data = np.random.normal(loc=75, scale=10, size=40)  
+plt.figure(figsize=(6, 4)) 
+plt.hist(data, bins=5, color='black', edgecolor='black', alpha=0.7) 
+plt.title('Histogram of Test Scores') 
+plt.xlabel('Test Scores') 
+plt.ylabel('Frequency') 
+plt.tight_layout() 
+plt.show() 
+Output:

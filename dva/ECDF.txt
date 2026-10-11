@@ -1,0 +1,18 @@
+EXPERIMENT – 7 
+Aim: Write a Python program to implement an Empirical Cumulative Distribution Function 
+(ECDF) plot. 
+Source Code: 
+import numpy as np 
+import statsmodels.api as sm 
+import matplotlib.pyplot as plt 
+data = np.random.normal(0, 1, 100) 
+ecdf = sm.distributions.ECDF(data) 
+x = np.linspace(min(data), max(data)) 
+y = ecdf(x) 
+plt.step(x, y) 
+plt.xlabel('X-axis Label') 
+plt.ylabel('ECDF') 
+plt.title('Empirical Cumulative Distribution Function (ECDF)') 
+plt.grid(True) 
+plt.show() 
+Output:
