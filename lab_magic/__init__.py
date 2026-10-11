@@ -7,6 +7,8 @@ GITHUB_REPO = "thanoojchokkakula-dev/Lab"
 GITHUB_RAW = f"https://raw.githubusercontent.com/{GITHUB_REPO}/main"
 GITHUB_API = f"https://api.github.com/repos/{GITHUB_REPO}/git/trees/main?recursive=1"
 
+_CURRENT_VIEW = []
+
 def _natural_sort_key(s):
     return [int(text) if text.isdigit() else text.lower() for text in re.split(r'(\d+)', s)]
 
@@ -51,21 +53,25 @@ def list_programs(folder=None, dir_path="."):
     return collected
 
 def list_all(folder=None, dir_path="."):
-    """Print a clean numbered list of all available programs and codes (.py and .txt) grouped by folder."""
+    """Print a clean numbered list of programs. Can filter by 'dva' or 'ml'."""
+    global _CURRENT_VIEW
     progs = list_programs(folder=folder, dir_path=dir_path)
-    if not progs:
-        # Fallback to remote if local was empty
+    if not progs and not folder:
         progs = _fetch_remote_list()
-        if folder:
-            f_norm = folder.strip().rstrip("/\\").lower()
-            progs = [p for p in progs if p.lower().startswith(f_norm + "/")]
+    elif not progs and folder:
+        remote = _fetch_remote_list()
+        f_norm = folder.strip().rstrip("/\\").lower()
+        progs = [p for p in remote if p.lower().startswith(f_norm + "/")]
+
+    _CURRENT_VIEW = progs
 
     if not progs:
         target = f" in '{folder}'" if folder else ""
         print(f"No programs found{target}.")
         return
 
-    print(f"=== Available Codes ({len(progs)} total) ===")
+    title_target = f" in [{folder}]" if folder else ""
+    print(f"=== Available Codes{title_target} ({len(progs)} total) ===")
     print("-" * 38)
 
     groups = {}
@@ -85,27 +91,64 @@ def list_all(folder=None, dir_path="."):
 
 list = list_all
 
-def get_code(name, dir_path="."):
-    """Read and return code for a program (by number e.g. 1, filename e.g. 'p1', or path e.g. 'ml/p1.py')."""
-    progs = list_programs(dir_path=dir_path)
-    if not progs:
-        progs = _fetch_remote_list()
+def dva():
+    """List only codes in dva folder."""
+    return list_all(folder="dva")
+
+def ml():
+    """List only codes in ml folder."""
+    return list_all(folder="ml")
+
+def get_code(*args, dir_path="."):
+    """
+    Read code for a program.
+    Supports:
+      get_code(1)                  -> uses last listed view or all codes
+      get_code('dva', 1)           -> 1st code in dva
+      get_code('ml', 1)            -> 1st code in ml
+      get_code('experment-1')      -> by name
+    """
+    global _CURRENT_VIEW
+    folder = None
+    name = None
+
+    if len(args) == 2:
+        folder, name = args
+    elif len(args) == 1:
+        name = args[0]
+    else:
+        raise ValueError("Usage: get_code(name_or_number) or get_code(folder, number)")
+
+    # If folder is specified (e.g. get_code('dva', 1))
+    if folder:
+        target_progs = list_programs(folder=folder, dir_path=dir_path)
+        if not target_progs:
+            remote = _fetch_remote_list()
+            f_norm = str(folder).strip().rstrip("/\\").lower()
+            target_progs = [p for p in remote if p.lower().startswith(f_norm + "/")]
+    elif _CURRENT_VIEW:
+        target_progs = _CURRENT_VIEW
+    else:
+        target_progs = list_programs(dir_path=dir_path)
+        if not target_progs:
+            target_progs = _fetch_remote_list()
 
     filename = None
 
     # 1. Number lookup (e.g. 1, '1', 2, '2')
     if isinstance(name, int) or (isinstance(name, str) and str(name).strip().isdigit()):
         idx = int(name) - 1
-        if 0 <= idx < len(progs):
-            filename = progs[idx]
+        if 0 <= idx < len(target_progs):
+            filename = target_progs[idx]
         else:
-            raise IndexError(f"Index {name} out of range (1 to {len(progs)} available).")
+            raise IndexError(f"Index {name} out of range (1 to {len(target_progs)} available).")
     else:
         name_str = str(name).strip().replace("\\", "/")
 
-        # Check in programs list
+        # Check in target_progs or all programs
+        all_progs = list_programs(dir_path=dir_path) or _fetch_remote_list()
         name_lower = name_str.lower()
-        for p in progs:
+        for p in all_progs:
             base = os.path.basename(p).lower()
             base_no_ext = os.path.splitext(base)[0]
             if name_lower in (p.lower(), base, base_no_ext):
@@ -114,7 +157,7 @@ def get_code(name, dir_path="."):
 
     if not filename:
         raise FileNotFoundError(
-            f"Code '{name}' not found. Available codes: {progs}"
+            f"Code '{name}' not found. Available codes: {target_progs}"
         )
 
     # First attempt: read local file if present
@@ -133,27 +176,27 @@ def get_code(name, dir_path="."):
     except Exception as e:
         raise FileNotFoundError(f"Could not load '{filename}' locally or from GitHub: {e}")
 
-def show(name, dir_path="."):
+def show(*args, dir_path="."):
     """Print code with clean formatting in cell output."""
-    code, filename = get_code(name, dir_path)
+    code, filename = get_code(*args, dir_path=dir_path)
     print(f"--- {filename} ---")
     print(code)
     print("-" * (len(filename) + 8))
 
-def load(name, replace=False):
+def load(*args, replace=False):
     """Load code directly into a Jupyter Notebook cell so you can edit and run it."""
     try:
         from IPython import get_ipython
         ip = get_ipython()
         if ip is not None:
-            code, filename = get_code(name)
+            code, filename = get_code(*args)
             ip.set_next_input(code, replace=replace)
             print(f"Loaded '{filename}' into cell.")
             return
     except Exception:
         pass
-    # If not in IPython, print code
-    show(name)
+    # Fallback to show
+    show(*args)
 
 # IPython Magic registration
 try:
@@ -163,26 +206,24 @@ try:
     class LabMagics(Magics):
         @line_magic
         def print_code(self, line):
-            """Usage: %print_code p1 or %print_code 1"""
-            name = line.strip()
-            if not name:
+            """Usage: %print_code 1 or %print_code dva 1"""
+            parts = line.strip().split()
+            if not parts:
                 list_all()
-                print("Usage: %print_code <name_or_number> (e.g. %print_code p1)")
                 return
             try:
-                show(name)
+                show(*parts)
             except Exception as e:
                 print(f"Error: {e}")
 
         @line_magic
         def load_code(self, line):
-            """Usage: %load_code p1 or %load_code 1 (loads code directly into Jupyter cell)"""
-            name = line.strip()
-            if not name:
-                print("Usage: %load_code <name_or_number> (e.g. %load_code p1)")
+            """Usage: %load_code 1 or %load_code ml 1"""
+            parts = line.strip().split()
+            if not parts:
                 return
             try:
-                code, _ = get_code(name)
+                code, _ = get_code(*parts)
                 self.shell.set_next_input(code, replace=True)
             except Exception as e:
                 print(f"Error: {e}")
