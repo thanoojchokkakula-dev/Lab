@@ -195,18 +195,23 @@ def load(*args, replace=False):
     show(*args)
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        cli_args = sys.argv[1:]
-        if len(cli_args) == 1 and cli_args[0].lower() in ("dva", "ml"):
-            list_all(folder=cli_args[0])
+    is_jupyter = "ipykernel" in sys.modules or any("kernel" in a or a == "-f" for a in sys.argv)
+    if not is_jupyter:
+        if len(sys.argv) > 1:
+            cli_args = sys.argv[1:]
+            if len(cli_args) == 1 and cli_args[0].lower() in ("dva", "ml"):
+                list_all(folder=cli_args[0])
+            else:
+                try:
+                    show(*cli_args)
+                except Exception as err:
+                    print(f"Error: {err}")
         else:
-            try:
-                show(*cli_args)
-            except Exception as err:
-                print(f"Error: {err}")
+            list_all()
+            print("\nUsage:")
+            print("  python lab.py <number_or_name>   (e.g., python lab.py 1  or  python lab.py p1)")
+            print("  python lab.py dva                (list only files in dva/)")
+            print("  python lab.py ml                 (list only files in ml/)")
     else:
-        list_all()
-        print("\nUsage:")
-        print("  python lab.py <number_or_name>   (e.g., python lab.py 1  or  python lab.py p1)")
-        print("  python lab.py dva                (list only files in dva/)")
-        print("  python lab.py ml                 (list only files in ml/)")
+        print("[OK] Lab tools loaded! Run dva() or ml() to list your codes.")
+
