@@ -2,6 +2,7 @@ import os
 import re
 import json
 import urllib.request
+import urllib.parse
 import sys
 
 GITHUB_REPO = "thanoojchokkakula-dev/Lab"
@@ -165,7 +166,8 @@ def get_code(*args, dir_path="."):
 
     # Remote GitHub fallback
     try:
-        url = f"{GITHUB_RAW}/{filename}"
+        encoded_filename = urllib.parse.quote(filename, safe="/")
+        url = f"{GITHUB_RAW}/{encoded_filename}"
         req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
         with urllib.request.urlopen(req, timeout=8) as resp:
             content = resp.read().decode("utf-8", errors="replace")
