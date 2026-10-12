@@ -1,0 +1,14 @@
+EXPERIMENT – 10
+Aim: Using Power BI, perform sales data visualization using predefined fields.
+Procedure:
+Dataset used (sales_data.csv). Sales = Quantity × UnitPrice.
+##table
+1.Open Power BI Desktop and click Home → Get data → Text/CSV.
+2.Select sales_data.csv and click Load.
+3.Check in the Data pane that the table Sales and all its fields are loaded.
+4.Clustered column chart: select the visual, drag Region to X-axis and Sales
+to Y-axis (Sum of Sales).
+5.Pie chart: drag Category to Legend and Sales to Values.
+6.Line chart: drag OrderDate to X-axis (keep only Month) and Sales to Y-axis.
+7.Card: drag Sales to Fields to display the total sales.
+8.Slicer: drag Region to a Slicer visual to filter all the charts.

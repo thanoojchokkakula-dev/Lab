@@ -1,0 +1,20 @@
+EXPERIMENT – 11
+Aim: Using Power BI, perform sales calculation and percentage analysis using
+calculated columns and DAX measures.
+Procedure:
+1.Open Power BI Desktop and click Home → Get data → Text/CSV.
+2.Select sales_data.csv and click Load.
+3.Use the same sales_data.csv table (Sales) as in Experiment 10.
+Calculated columns (Modeling → New column):
+Total Cost = Sales[Quantity] * Sales[UnitCost]
+Profit = Sales[Sales] - Sales[Total Cost]
+Measures (Modeling → New measure):
+Total Sales = SUM(Sales[Sales])
+Total Profit = SUM(Sales[Profit])
+Profit Margin % = DIVIDE([Total Profit], [Total Sales]) * 100
+Sales % of Total =
+DIVIDE([Total Sales], CALCULATE([Total Sales], ALL(Sales))) * 100
+1.Insert a Table visual and drag Region, Total Sales, Total Profit, Profit Margin
+% and Sales % of Total into it.
+2.Insert a Card for Total Sales and another Card for Total Profit.
+3.Insert a Clustered bar chart with Region on the axis and Sales % of Total as the value.
