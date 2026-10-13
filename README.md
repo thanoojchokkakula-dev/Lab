@@ -10,13 +10,15 @@ Repository for lab experiments and programs organized by folders:
 
 ### Browse the ML programs as a Python package
 
-Install the latest version directly from this public GitHub repository:
+Install the latest version directly from this public GitHub repository. This
+uses GitHub's ZIP download, so Git does not need to be installed on the
+computer:
 
 ```python
-%pip install --upgrade git+https://github.com/thanoojchokkakula-dev/Lab.git
+%pip install --upgrade --force-reinstall --no-deps https://github.com/thanoojchokkakula-dev/Lab/archive/refs/heads/main.zip
 ```
 
-Then list and print programs:
+Restart the notebook kernel after installation, then list and print programs:
 
 ```python
 import ml
@@ -31,10 +33,31 @@ You can also print a program by filename, without the `.py` extension:
 ml.show("linear_regression")
 ```
 
-When new programs are pushed to GitHub, run the install command again to update
-the package on the other laptop. The PyPI name `ml` is already used by an
-unrelated project, so install this repository from GitHub rather than running
-`pip install ml`.
+Run the install command again after new programs are pushed. The package is
+named `lab-ml-programs` to avoid confusing it with unrelated packages already
+installed on a computer. Import it in Python as `ml`. Do not use `pip install
+ml`; that PyPI name belongs to an unrelated project.
+
+#### If installation is blocked on an older college computer
+
+Download the repository ZIP from
+https://github.com/thanoojchokkakula-dev/Lab/archive/refs/heads/main.zip and
+extract it. In Jupyter, change the working directory to the extracted `Lab`
+folder, or add that folder to Python's module path:
+
+```python
+import sys
+sys.path.insert(0, r"C:\path\to\Lab")
+
+import ml
+ml.list()
+ml.show(1)
+```
+
+This fallback does not install anything and does not need Git. To display the
+code, Python only needs to be able to import the package. Running a displayed
+program may additionally require that program's libraries (for example,
+scikit-learn, pandas, or matplotlib).
 
 ### Browse both `dva/` and `ml/` with the `lab` helper
 
@@ -77,7 +100,7 @@ Print code by number or name:
 
 3. On the other laptop in Jupyter, simply run:
    ```python
-   %pip install --upgrade git+https://github.com/thanoojchokkakula-dev/Lab.git
+   %pip install --upgrade --force-reinstall --no-deps https://github.com/thanoojchokkakula-dev/Lab/archive/refs/heads/main.zip
    import ml
    ml.list()
    ```
