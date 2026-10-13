@@ -8,32 +8,42 @@ Repository for lab experiments and programs organized by folders:
 
 ## 💻 On the Other Laptop (In Jupyter Notebook)
 
-Open any Jupyter Notebook on the other laptop:
+### Browse the ML programs as a Python package
 
-### Option 1: Using Git (Recommended)
+Install the latest version directly from this public GitHub repository:
 
-#### 1. Setup / Update:
 ```python
-!git pull
+%pip install --upgrade git+https://github.com/thanoojchokkakula-dev/Lab.git
 ```
-*(If cloning for the very first time on a new laptop: `!git clone https://github.com/thanoojchokkakula-dev/Lab.git` and `%cd Lab`)*
 
-#### 2. View All Saved Codes (Shows both folders):
+Then list and print programs:
+
+```python
+import ml
+
+ml.list()
+ml.show(1)  # Print the first program in the list
+```
+
+You can also print a program by filename, without the `.py` extension:
+
+```python
+ml.show("linear_regression")
+```
+
+When new programs are pushed to GitHub, run the install command again to update
+the package on the other laptop. The PyPI name `ml` is already used by an
+unrelated project, so install this repository from GitHub rather than running
+`pip install ml`.
+
+### Browse both `dva/` and `ml/` with the `lab` helper
+
+The existing `lab` helper can also list files from both folders. Install this
+repository in the notebook environment as above, then use:
+
 ```python
 import lab
 lab.list()
-```
-Output:
-```text
-=== Available Codes (2 total) ===
---------------------------------------
-[dva]
-  [1] dva/experment-1.txt
-
-[ml]
-  [2] ml/p1.py
-
---------------------------------------
 ```
 
 You can also filter by folder:
@@ -42,41 +52,16 @@ lab.list('dva')   # Shows only dva files
 lab.list('ml')    # Shows only ml files
 ```
 
-#### 3. Print or Load Any Code:
+Print code by number or name:
 - **By Number:**
   ```python
-  lab.show(1)    # Prints program #1 (dva/experment-1.txt)
-  lab.show(2)    # Prints program #2 (ml/p1.py)
+  lab.show(1)
   ```
 
 - **By Name (searches automatically across all folders):**
   ```python
-  lab.show('experment-1')  # Prints dva/experment-1.txt
-  lab.show('p1')           # Prints ml/p1.py
+  lab.show('linear_regression')
   ```
-
-- **Load Directly into Cell (Jupyter %load Magic):**
-  ```python
-  %load dva/experment-1.txt
-  # or
-  %load ml/p1.py
-  ```
-  *(Press **Shift + Enter**, and Jupyter replaces the cell with the full code!)*
-
----
-
-### Option 2: Without Git (Direct 1-Liner from GitHub)
-
-If git is not installed, fetch and print any file directly from GitHub:
-
-```python
-import urllib.request
-# Fetch from dva folder:
-print(urllib.request.urlopen("https://raw.githubusercontent.com/thanoojchokkakula-dev/Lab/main/dva/experment-1.txt").read().decode())
-
-# Fetch from ml folder:
-print(urllib.request.urlopen("https://raw.githubusercontent.com/thanoojchokkakula-dev/Lab/main/ml/p1.py").read().decode())
-```
 
 ---
 
@@ -92,6 +77,7 @@ print(urllib.request.urlopen("https://raw.githubusercontent.com/thanoojchokkakul
 
 3. On the other laptop in Jupyter, simply run:
    ```python
-   !git pull
-   lab.list()
+   %pip install --upgrade git+https://github.com/thanoojchokkakula-dev/Lab.git
+   import ml
+   ml.list()
    ```

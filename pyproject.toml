@@ -13,4 +13,4 @@ dependencies = ["ipython"]
 py-modules = ["lab"]
 
 [tool.setuptools.packages.find]
-include = ["lab_magic*"]
+include = ["lab_magic*", "ml*"]
