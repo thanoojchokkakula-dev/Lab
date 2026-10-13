@@ -34,17 +34,22 @@ def _fetch_remote_list():
 
 def list_programs(folder=None, dir_path="."):
     """Return list of program paths from dva/ and ml/ (locally if present, or live from GitHub)."""
-    has_lab_dirs = os.path.isdir(os.path.join(dir_path, "dva")) or os.path.isdir(os.path.join(dir_path, "ml"))
-    
     collected = []
-    if has_lab_dirs:
-        for cat in ("dva", "ml"):
-            cat_dir = os.path.join(dir_path, cat)
-            if os.path.isdir(cat_dir):
-                for f in os.listdir(cat_dir):
-                    if (f.endswith(".py") or f.endswith(".txt")) and not f.startswith("."):
-                        collected.append(f"{cat}/{f}")
-    else:
+    package_dir = os.path.dirname(os.path.abspath(__file__))
+    for cat in ("dva", "ml"):
+        cat_dir = os.path.join(dir_path, cat)
+        if not os.path.isdir(cat_dir):
+            cat_dir = os.path.join(package_dir, cat)
+        if os.path.isdir(cat_dir):
+            for filename in os.listdir(cat_dir):
+                if (
+                    (filename.endswith(".py") or filename.endswith(".txt"))
+                    and not filename.startswith(".")
+                    and filename != "__init__.py"
+                ):
+                    collected.append(f"{cat}/{filename}")
+
+    if not collected:
         collected = _fetch_remote_list()
 
     if folder:
@@ -159,10 +164,14 @@ def get_code(*args, dir_path="."):
         )
 
     # Local file check
-    filepath = os.path.join(dir_path, filename)
-    if os.path.isfile(filepath):
-        with open(filepath, "r", encoding="utf-8", errors="replace") as f:
-            return f.read(), filename
+    local_paths = (
+        os.path.join(dir_path, filename),
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), filename),
+    )
+    for filepath in local_paths:
+        if os.path.isfile(filepath):
+            with open(filepath, "r", encoding="utf-8", errors="replace") as f:
+                return f.read(), filename
 
     # Remote GitHub fallback
     try:
@@ -216,4 +225,3 @@ if __name__ == "__main__":
             print("  python lab.py ml                 (list only files in ml/)")
     else:
         print("[OK] Lab tools loaded! Run dva() or ml() to list your codes.")
-

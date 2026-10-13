@@ -15,7 +15,7 @@ uses GitHub's ZIP download, so Git does not need to be installed on the
 computer:
 
 ```python
-%pip install --upgrade --force-reinstall --no-deps https://github.com/thanoojchokkakula-dev/Lab/archive/refs/heads/main.zip
+%pip install --upgrade --force-reinstall --no-cache-dir --no-deps https://github.com/thanoojchokkakula-dev/Lab/archive/refs/heads/main.zip
 ```
 
 Restart the notebook kernel after installation, then list and print programs:
@@ -25,6 +25,14 @@ import ml
 
 ml.list()
 ml.show(1)  # Print the first program in the list
+```
+
+The scripts are installed inside Python's `site-packages` directory, not in
+the notebook's current folder. Find that installed folder with:
+
+```python
+from pathlib import Path
+print(Path(ml.__file__).resolve().parent)
 ```
 
 You can also print a program by filename, without the `.py` extension:
@@ -61,8 +69,16 @@ scikit-learn, pandas, or matplotlib).
 
 ### Browse both `dva/` and `ml/` with the `lab` helper
 
-The existing `lab` helper can also list files from both folders. Install this
-repository in the notebook environment as above, then use:
+The same installation includes the DVA text files. Browse or print them with:
+
+```python
+import dva
+
+dva.list()
+dva.show(1)
+```
+
+To browse both folders through the `lab` helper:
 
 ```python
 import lab
@@ -100,7 +116,7 @@ Print code by number or name:
 
 3. On the other laptop in Jupyter, simply run:
    ```python
-   %pip install --upgrade --force-reinstall --no-deps https://github.com/thanoojchokkakula-dev/Lab/archive/refs/heads/main.zip
+   %pip install --upgrade --force-reinstall --no-cache-dir --no-deps https://github.com/thanoojchokkakula-dev/Lab/archive/refs/heads/main.zip
    import ml
    ml.list()
    ```

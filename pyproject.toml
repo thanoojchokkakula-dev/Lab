@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "lab-ml-programs"
-version = "0.2.0"
+version = "0.3.0"
 description = "Browse machine-learning lab programs from the Lab repository"
 requires-python = ">=3.7"
 
@@ -12,4 +12,7 @@ requires-python = ">=3.7"
 py-modules = ["lab"]
 
 [tool.setuptools.packages.find]
-include = ["lab_magic*", "ml*"]
+include = ["dva*", "lab_magic*", "ml*"]
+
+[tool.setuptools.package-data]
+dva = ["*.txt"]
