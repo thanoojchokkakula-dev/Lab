@@ -10,12 +10,10 @@ Repository for lab experiments and programs organized by folders:
 
 ### Browse the ML programs as a Python package
 
-Install the latest version directly from this public GitHub repository. This
-uses GitHub's ZIP download, so Git does not need to be installed on the
-computer:
+Once published on PyPI, install it with one command:
 
 ```python
-%pip install --upgrade --force-reinstall --no-cache-dir --no-deps https://github.com/thanoojchokkakula-dev/Lab/archive/refs/heads/main.zip
+%pip install --upgrade lab-ml-programs
 ```
 
 Restart the notebook kernel after installation, then list and print programs:
@@ -41,10 +39,24 @@ You can also print a program by filename, without the `.py` extension:
 ml.show("linear_regression")
 ```
 
-Run the install command again after new programs are pushed. The package is
-named `lab-ml-programs` to avoid confusing it with unrelated packages already
-installed on a computer. Import it in Python as `ml`. Do not use `pip install
-ml`; that PyPI name belongs to an unrelated project.
+The distribution is named `lab-ml-programs` and imports as `ml` or `dva`.
+Do not use `pip install ml`; that PyPI name belongs to an unrelated project.
+After new programs are released, run the install command again to update.
+
+#### First-time PyPI publishing setup
+
+The PyPI project must be published before the short install command works.
+The repository is configured to publish when a GitHub Release is published.
+The repository owner must first configure a PyPI Trusted Publisher for:
+
+- Owner: `thanoojchokkakula-dev`
+- Repository: `Lab`
+- Workflow: `publish-pypi.yml`
+- Environment: `pypi`
+
+Then create and publish a GitHub Release tagged `v0.3.0`. PyPI will receive
+the package through GitHub Actions; no PyPI token needs to be stored in this
+repository.
 
 #### If installation is blocked on an older college computer
 
@@ -114,9 +126,10 @@ Print code by number or name:
    git push
    ```
 
-3. On the other laptop in Jupyter, simply run:
+3. Publish a GitHub Release with a new version tag to upload it to PyPI. On the
+   other laptop in Jupyter, update with:
    ```python
-   %pip install --upgrade --force-reinstall --no-cache-dir --no-deps https://github.com/thanoojchokkakula-dev/Lab/archive/refs/heads/main.zip
+   %pip install --upgrade lab-ml-programs
    import ml
    ml.list()
    ```
